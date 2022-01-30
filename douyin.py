@@ -63,13 +63,6 @@ class DouYin:
             input('读取配置文件失败，请确保配置正确，编码是否为GB2312，请使用SublimeText或NotePad++编辑，按任意键继续')
             exit(0)
 
-    def hello(self):
-        print("*" * 50)
-        print(' ' * 15 + '抖音下载小助手')
-        print(' ' * 5 + '作者: HuangSK  Date: 2021-01-21 13:14')
-        print("*" * 50)
-        return self
-
     def remove(self):
         if os.path.exists(self.current_download_name):
             os.remove(self.current_download_name)
@@ -116,6 +109,9 @@ class DouYin:
             if response.status_code == 200:
                 text = '----[文件大小]:%0.2f MB' % (content_size / chunk_size / 1024)
                 self.current_download_name = video_name
+                if os.path.exists(video_name+'.mp4'):
+                    print(f"文件已经存在：{video_name}")
+                    return
                 with open(video_name, 'wb') as file:
                     for data in response.iter_content(chunk_size=chunk_size):
                         file.write(data)
@@ -144,10 +140,11 @@ class DouYin:
         return response
 
     def get_sec_uid(self, url):
-        rsp = self.get_request(url)
-        sec_uid = re.search(r'sec_uid=.*?\&', rsp.url).group(0)
-        return sec_uid[8:-1]
-
+        sec_uid = url.split("/")[-1]
+        # rsp = self.get_request(url)
+        # sec_uid = re.search(r'sec_uid=.*?\&', rsp.url).group(0)
+        # sec_uid = "MS4wLjABAAAATlvvWE6dgcvJt1GwUYu_LutUD-OxaxjRFgXQ_Szg6Go"
+        return sec_uid
     def get_history(self):
         history = []
         with open('history.txt', 'a+') as f:
@@ -167,10 +164,10 @@ class DouYin:
         self.history = self.get_history()
         print('---历史下载共 {0} 个视频'.format(len(self.history)))
 
-        answer = input('是否确认下载上述链接中的视频? Y/n:')
-        if answer != 'Y' and answer != 'y':
-            input('取消下载, 按任意键退出')
-            exit(0)
+        # answer = input('是否确认下载上述链接中的视频? Y/n:')
+        # if answer != 'Y' and answer != 'y':
+        #     input('取消下载, 按任意键退出')
+        #     exit(0)
 
         for url in self.shared_list:
             print('正在解析下载 ' + url)
@@ -220,7 +217,7 @@ class DouYin:
 if __name__ == "__main__":
     app = DouYin()
     try:
-        app.hello().run()
+        app.run()
     except KeyboardInterrupt:
         app.remove()
         input('\r\n终止下载，按任意键退出。。。')
